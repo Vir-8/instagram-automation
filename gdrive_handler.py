@@ -14,8 +14,7 @@ drive_service = build("drive", "v3", credentials=credentials)
 
 
 class GDriveHandler:
-    def __init__(self, drive_folder_url, pc_folder_path):
-        self.drive_folder_url = drive_folder_url
+    def __init__(self, pc_folder_path):
         self.pc_folder_path = pc_folder_path
 
     def get_all_videos(self):
