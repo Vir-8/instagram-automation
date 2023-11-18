@@ -4,6 +4,7 @@ from uiautomator2 import Device
 import random
 from gdrive_handler import GDriveHandler
 from file_uploader import FileUploader
+from growth_handler import GrowthHandler
 
 RANDOM_ACTIVITY_TIME = 30
 
@@ -56,18 +57,24 @@ def main():
 
     gdrive_handler = GDriveHandler(pc_folder_path)
 
-    video_files = gdrive_handler.get_all_videos()
+    upload_videos = input("Do you want to upload videos? (true/false): ")
 
-    for video in video_files:
-        pc_vid_path = gdrive_handler.download_files(video)
-        file_handler = FileUploader(pc_vid_path)
+    if upload_videos == "true":
+        video_files = gdrive_handler.get_all_videos()
 
-        android_vid_path = file_handler.transfer_file_to_device(d)
-        file_handler.upload_reel(d, android_vid_path)
+        for video in video_files:
+            pc_vid_path = gdrive_handler.download_files(video)
+            file_handler = FileUploader(pc_vid_path)
 
-        random_activity(d)
+            android_vid_path = file_handler.transfer_file_to_device(d)
+            file_handler.upload_reel(d, android_vid_path)
 
-        time.sleep(1500)
+            random_activity(d)
+
+            time.sleep(1500)
+    else:
+        growth_handler = GrowthHandler
+        growth_handler.follow_accounts(d)
 
 
 main()
