@@ -8,10 +8,15 @@ from file_uploader import FileUploader
 from growth_handler import GrowthHandler
 from account_handler import AccountHandler
 import concurrent.futures
+import json
 
 RANDOM_ACTIVITY_TIME = 60
 
 resource_ids = {"home_button": "com.instagram.android:id/feed_tab"}
+
+# Load configuration from config.json
+with open("account_config.json", "r") as config_file:
+    account_config = json.load(config_file)
 
 
 def random_activity(d: Device):
@@ -56,39 +61,8 @@ def random_activity(d: Device):
     time.sleep(2)
 
 
-def split_content_chunks(connected_devices, videos):
-    # Get total number of accounts at the start to divide into chunks
-    total_number_of_accounts = 0
-    with concurrent.futures.ThreadPoolExecutor(
-        max_workers=len(connected_devices)
-    ) as executor:
-        # Create a separate instance for each device inside the thread
-        instances = [AccountHandler(device) for device in connected_devices]
-
-        # Use a lambda function to call get_all_accounts on each instance
-        results = list(
-            executor.map(
-                lambda instance: instance.get_all_accounts(),
-                instances,
-            )
-        )
-
-    # Calculate total number of videos and average videos per account
-    total_number_of_videos = len(videos)
-    total_number_of_accounts = sum(len(result) for result in results)
-    average_videos_per_account = total_number_of_videos / total_number_of_accounts
-
-    # Create video chunks based on the number of accounts on each device
-    content_chunks = []
-    for result in results:
-        num_videos_for_device = int(average_videos_per_account * len(result))
-        content_chunks.append(videos[:num_videos_for_device])
-        videos = videos[num_videos_for_device:]
-
-    return content_chunks
-
-
-def account_growth_handler(d):
+def account_growth_handler(device):
+    d = u2.connect(device)
     account_handler = AccountHandler(d)
     growth_handler = GrowthHandler(d)
 
@@ -101,49 +75,62 @@ def account_growth_handler(d):
         time.sleep(8)
 
 
-def content_upload_handler(d, chunk):
+def content_upload_handler(device):
+    d = u2.connect(device)
+    d.dump_hierarchy()  # As ADB can cause issues otherwise
     pc_folder_path = "./videos"
+
     gdrive_handler = GDriveHandler(pc_folder_path)
     account_handler = AccountHandler(d)
 
-    index = 0
-    accounts = account_handler.get_all_accounts()
-    num_of_accounts = len(accounts)
-    num_of_posts = len(chunk)
+    accounts = [
+        (account, folder_id)
+        for account, folder_id in account_config["devices"].get(device, {}).items()
+        if folder_id != "N/A"
+    ]
 
-    for content in chunk:
-        # Switch account for each iteration
-        current_account = accounts[index % num_of_accounts]
-        account_handler.switch_account(current_account)
+    videos = {account: [] for account, folder_id in accounts}
 
-        pc_vid_path = gdrive_handler.download_files(content)
-        file_handler = FileUploader(pc_vid_path)
+    for account, folder_id in accounts:
+        videos_on_account = gdrive_handler.get_all_videos(folder_id)
+        videos[account] = videos_on_account
 
-        android_vid_path = file_handler.transfer_file_to_device(d)
-        file_handler.upload_reel(d, android_vid_path)
+    while any(videos.values()):
+        for account, folder_id in accounts:
+            video_list = videos[account]
+            account_handler.switch_account(account)
 
-        random_activity(d)
-        index += 1
-        num_of_posts -= 1
-        time.sleep(1500)
+            if video_list:
+                current_video = video_list[0]
+                print(
+                    f"Downloading {current_video['name']} for account: {account} on device: {device}."
+                )
+                pc_vid_path = gdrive_handler.download_files(current_video)
+
+                file_handler = FileUploader(pc_vid_path)
+                android_vid_path = file_handler.transfer_file_to_device(d)
+                file_handler.upload_reel(d, android_vid_path)
+
+                print(
+                    f"Video '{current_video['name']}' uploaded for account '{account}'."
+                )
+
+                # Remove the uploaded video from the account's video list
+                videos[account] = video_list[1:]
+
+                random_activity(d)
+                time.sleep(1500)
 
 
 def main():
-    pc_folder_path = "./videos"
-    gdrive_handler = GDriveHandler(pc_folder_path)
-
-    connected_devices = [
-        u2.connect(device.serial) for device in adbutils.adb.device_list()
-    ]
-    videos = gdrive_handler.get_all_videos()
+    connected_devices = [device.serial for device in adbutils.adb.device_list()]
     choice = input("1. Upload videos\n2. Grow accounts\nEnter your choice: ")
 
     if choice == "1":
-        content_chunks = split_content_chunks(connected_devices, videos)
         with concurrent.futures.ThreadPoolExecutor(
             max_workers=len(connected_devices)
         ) as executor:
-            executor.map(content_upload_handler, connected_devices, content_chunks)
+            executor.map(content_upload_handler, connected_devices)
     elif choice == "2":
         with concurrent.futures.ThreadPoolExecutor(
             max_workers=len(connected_devices)
