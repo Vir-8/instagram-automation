@@ -5,7 +5,9 @@ from googleapiclient.http import MediaIoBaseDownload
 import json
 
 # Load configuration from config.json
-with open("config.json", "r") as config_file:
+config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.json")
+
+with open(config_path, "r") as config_file:
     config = json.load(config_file)
 
 FOLDER_ID = config["google_drive_folder_id"]

@@ -3,10 +3,10 @@ import uiautomator2 as u2
 from uiautomator2 import Device
 import random
 import adbutils
-from gdrive_handler import GDriveHandler
-from file_uploader import FileUploader
-from growth_handler import GrowthHandler
-from account_handler import AccountHandler
+from classes.gdrive_handler import GDriveHandler
+from classes.file_uploader import FileUploader
+from classes.growth_handler import GrowthHandler
+from classes.account_handler import AccountHandler
 import concurrent.futures
 import json
 

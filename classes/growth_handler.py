@@ -1,9 +1,12 @@
 import time
 import json
 import random
+import os
 
 # Read the JSON file
-with open("config.json", "r") as file:
+config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.json")
+
+with open(config_path, "r") as file:
     config_data = json.load(file)
 
 # Access the array from the config data
