@@ -98,6 +98,8 @@ def content_upload_handler(device):
     while any(videos.values()):
         for account, folder_id in accounts:
             video_list = videos[account]
+            d.app_start("com.instagram.android", activity=".activity.MainTabActivity")
+            time.sleep(2)
             account_handler.switch_account(account)
 
             if video_list:
@@ -109,8 +111,10 @@ def content_upload_handler(device):
 
                 file_handler = FileUploader(pc_vid_path)
                 android_vid_path = file_handler.transfer_file_to_device(d)
-                file_handler.upload_reel(d, android_vid_path)
-
+                try:
+                    file_handler.upload_reel(d, android_vid_path)
+                except Exception as e:
+                    print(f"Error: {e}")
                 print(
                     f"Video '{current_video['name']}' uploaded for account '{account}'."
                 )
@@ -120,6 +124,7 @@ def content_upload_handler(device):
 
                 random_activity(d)
                 time.sleep(1500)
+        d.app_stop("com.instagram.android")
 
 
 def main():
@@ -127,16 +132,22 @@ def main():
     choice = input("1. Upload videos\n2. Grow accounts\nEnter your choice: ")
 
     if choice == "1":
-        with concurrent.futures.ThreadPoolExecutor(
-            max_workers=len(connected_devices)
-        ) as executor:
-            executor.map(content_upload_handler, connected_devices)
+        if len(connected_devices) == 0:
+            print("No devices connected!")
+        else:
+            with concurrent.futures.ThreadPoolExecutor(
+                max_workers=len(connected_devices)
+            ) as executor:
+                executor.map(content_upload_handler, connected_devices)
     elif choice == "2":
-        with concurrent.futures.ThreadPoolExecutor(
-            max_workers=len(connected_devices)
-        ) as executor:
-            # Pass the instances as arguments to the threaded function
-            executor.map(account_growth_handler, connected_devices)
+        if len(connected_devices) == 0:
+            print("No devices connected!")
+        else:
+            with concurrent.futures.ThreadPoolExecutor(
+                max_workers=len(connected_devices)
+            ) as executor:
+                # Pass the instances as arguments to the threaded function
+                executor.map(account_growth_handler, connected_devices)
     else:
         print("Error! Invalid choice, please try again!")
 
