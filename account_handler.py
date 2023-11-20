@@ -10,7 +10,6 @@ resource_ids = {
 class AccountHandler:
     def __init__(self, d):
         self.d = d
-        pass
 
     def get_all_accounts(self):
         d = self.d
@@ -39,6 +38,7 @@ class AccountHandler:
             name = element.info["text"]
             accounts[i] = name
 
+        d.press("back")
         return accounts
 
     def switch_account(self, account):
