@@ -2,8 +2,13 @@ import os
 from google.oauth2 import service_account
 from googleapiclient.discovery import build
 from googleapiclient.http import MediaIoBaseDownload
+import json
 
-FOLDER_ID = "1jvWVxvOZzENurPJIZNmYw41R-fa37LBh"
+# Load configuration from config.json
+with open("config.json", "r") as config_file:
+    config = json.load(config_file)
+
+FOLDER_ID = config["google_drive_folder_id"]
 SERVICE_ACCOUNT_FILE = "./credentials.json"
 
 # Initialize the Google Drive API using the service account credentials
@@ -17,11 +22,25 @@ class GDriveHandler:
     def __init__(self, pc_folder_path):
         self.pc_folder_path = pc_folder_path
 
-    def get_all_videos(self):
+    def get_all_folders(self):
         results = (
             drive_service.files()
             .list(
-                q=f"'{FOLDER_ID}' in parents and mimeType contains 'video/'",
+                q=f"'{FOLDER_ID}' in parents and mimeType = 'application/vnd.google-apps.folder'",
+                fields="files(id, name)",
+                orderBy="createdTime",
+            )
+            .execute()
+        )
+
+        folder_files = results.get("files", [])
+        return folder_files
+
+    def get_all_videos(self, account_folder_id):
+        results = (
+            drive_service.files()
+            .list(
+                q=f"'{account_folder_id}' in parents and mimeType contains 'video/'",
                 fields="files(id, name)",
                 orderBy="createdTime",
             )
