@@ -5,13 +5,18 @@ from googleapiclient.http import MediaIoBaseDownload
 import json
 
 # Load configuration from config.json
-config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.json")
+config_path = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), "..", "config.json"
+)
+
+current_directory = os.getcwd()
+credentials_path = os.path.join(current_directory, "credentials.json")
 
 with open(config_path, "r") as config_file:
     config = json.load(config_file)
 
 FOLDER_ID = config["google_drive_folder_id"]
-SERVICE_ACCOUNT_FILE = "./credentials.json"
+SERVICE_ACCOUNT_FILE = credentials_path
 
 # Initialize the Google Drive API using the service account credentials
 credentials = service_account.Credentials.from_service_account_file(

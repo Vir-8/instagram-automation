@@ -3,9 +3,11 @@ import json
 import random
 import os
 
-# Read the JSON file
-config_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "config.json")
+# Get the current script's directory
+script_dir = os.path.dirname(os.path.realpath(__file__))
 
+# Construct the path to the config.json file
+config_path = os.path.join(script_dir, "..", "config.json")
 with open(config_path, "r") as file:
     config_data = json.load(file)
 
