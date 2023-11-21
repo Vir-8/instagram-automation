@@ -43,19 +43,30 @@ class GDriveHandler:
         folder_files = results.get("files", [])
         return folder_files
 
-    def get_all_videos(self, account_folder_id):
+    def get_all_media_files(self, account_folder_id):
         results = (
             drive_service.files()
             .list(
-                q=f"'{account_folder_id}' in parents and mimeType contains 'video/'",
-                fields="files(id, name)",
+                q=f"'{account_folder_id}' in parents and (mimeType contains 'video/' or mimeType contains 'image/')",
+                fields="files(id, name, mimeType)",
                 orderBy="createdTime",
             )
             .execute()
         )
 
-        video_files = results.get("files", [])
-        return video_files
+        media_files = results.get("files", [])
+
+        # Add a 'media_type' field to each file in the results
+        for file_info in media_files:
+            mime_type = file_info.get("mimeType", "")
+            if "video/" in mime_type:
+                file_info["media_type"] = "video"
+            elif "image/" in mime_type:
+                file_info["media_type"] = "image"
+            else:
+                file_info["media_type"] = "unknown"
+
+        return media_files
 
     def download_files(self, video_file):
         # Create PC folder if not exists
