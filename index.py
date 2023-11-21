@@ -10,25 +10,24 @@ from classes.account_handler import AccountHandler
 import concurrent.futures
 import json
 
-RANDOM_ACTIVITY_TIME = 60
-
 resource_ids = {"home_button": "com.instagram.android:id/feed_tab"}
 
 # Load configuration from config.json
 with open("account_config.json", "r") as config_file:
     account_config = json.load(config_file)
 
+with open("config.json", "r") as file:
+    config_data = json.load(file)
 
-def random_activity(d: Device):
+
+def random_activity(d: Device, total_duration):
+    # Perform random activity for a set time, scrolling or liking at random intervals
     print(f"Performing random activity on device: {d.serial}")
 
     activity_handler = GrowthHandler(d)
     # Click on home in case home isn't open
     d(resourceId=resource_ids["home_button"]).click()
     time.sleep(2)
-
-    # Perform random activity for a set time, scrolling or liking at random intervals
-    total_duration = RANDOM_ACTIVITY_TIME
 
     scroll_chances = 0.3  # 70%
     like_chances = 0.3  # 30%
@@ -40,25 +39,23 @@ def random_activity(d: Device):
     # Main loop
     while time.time() - start_time < total_duration:
         # Generate random time interval and number
-        interval = random.uniform(3, 7)
+        interval = random.uniform(1, 5)
         random_number = random.random()
-        print(f"Random number is {random_number}")
 
         if random_number > scroll_chances:
             # Swipe the screen from bottom to top
-            print("Scrolling")
             activity_handler.scroll(0.3)
         elif random_number < like_chances:
-            print("Liking")
             activity_handler.like_post()
             if random_number < comment_chances:
-                print("Commenting")
                 activity_handler.comment_on_post()
                 activity_handler.scroll(0.3)
 
         time.sleep(interval)
 
     time.sleep(2)
+    d.app_stop("com.instagram.android")
+    print("Finished performing random activity")
 
 
 def account_growth_handler(device):
@@ -69,16 +66,27 @@ def account_growth_handler(device):
     accounts = account_handler.get_all_accounts()
 
     for account in accounts:
+        d.app_start("com.instagram.android", activity=".activity.MainTabActivity")
         account_handler.switch_account(account)
-        growth_handler.follow_accounts()
-        growth_handler.promote_accounts()
+
+        if config_data["follow"]:
+            growth_handler.follow_accounts()
+
+        if config_data["like"] or config_data["comment"]:
+            growth_handler.promote_accounts()
+
         time.sleep(8)
+        random_activity(d, 120)
+
+        d.app_stop("com.instagram.android")
+        time.sleep(1500)
+    print("Finished promoting accounts")
 
 
 def content_upload_handler(device):
     d = u2.connect(device)
     d.dump_hierarchy()  # As ADB can cause issues otherwise
-    pc_folder_path = "./videos"
+    pc_folder_path = "./content"
 
     gdrive_handler = GDriveHandler(pc_folder_path)
     account_handler = AccountHandler(d)
@@ -89,47 +97,51 @@ def content_upload_handler(device):
         if folder_id != "N/A"
     ]
 
-    videos = {account: [] for account, folder_id in accounts}
+    content = {account: [] for account, folder_id in accounts}
 
     for account, folder_id in accounts:
-        videos_on_account = gdrive_handler.get_all_videos(folder_id)
-        videos[account] = videos_on_account
+        content_on_account = gdrive_handler.get_all_media_files(folder_id)
+        content[account] = content_on_account
 
-    while any(videos.values()):
+    while any(content.values()):
         for account, folder_id in accounts:
-            video_list = videos[account]
+            media_list = content[account]
             d.app_start("com.instagram.android", activity=".activity.MainTabActivity")
             time.sleep(2)
             account_handler.switch_account(account)
 
-            if video_list:
-                current_video = video_list[0]
+            if media_list:
+                media = media_list[0]
                 print(
-                    f"Downloading {current_video['name']} for account: {account} on device: {device}."
+                    f"Downloading {media['name']} for account: {account} on device: {device}."
                 )
-                pc_vid_path = gdrive_handler.download_files(current_video)
+                pc_vid_path = gdrive_handler.download_files(media)
 
                 file_handler = FileUploader(pc_vid_path)
                 android_vid_path = file_handler.transfer_file_to_device(d)
                 try:
-                    file_handler.upload_reel(d, android_vid_path)
+                    if media["media_type"] == "video":
+                        file_handler.upload_reel(d, android_vid_path)
+                    elif media["media_type"] == "image":
+                        file_handler.upload_post(d, android_vid_path)
                 except Exception as e:
                     print(f"Error: {e}")
-                print(
-                    f"Video '{current_video['name']}' uploaded for account '{account}'."
-                )
+                print(f"{media['name']}' uploaded for account '{account}'.")
 
                 # Remove the uploaded video from the account's video list
-                videos[account] = video_list[1:]
+                content[account] = media_list[1:]
+                time.sleep(15)
 
-                random_activity(d)
+                random_activity(d, 120)
                 time.sleep(1500)
         d.app_stop("com.instagram.android")
+
+    print(f"Finished uploading content from device: {device}")
 
 
 def main():
     connected_devices = [device.serial for device in adbutils.adb.device_list()]
-    choice = input("1. Upload videos\n2. Grow accounts\nEnter your choice: ")
+    choice = input("1. Post content\n2. Grow accounts\nEnter your choice: ")
 
     if choice == "1":
         if len(connected_devices) == 0:

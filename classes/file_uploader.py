@@ -103,7 +103,7 @@ class FileUploader:
 
     def upload_post(self, d, path):
         d.shell(
-            f"am start -a android.intent.action.SEND -t video/* --eu android.intent.extra.STREAM {path} com.instagram.android"
+            f"am start -a android.intent.action.SEND -t image/* --eu android.intent.extra.STREAM '{path}' com.instagram.android"
         )
         d(text="Feed").click()
         time.sleep(2)
