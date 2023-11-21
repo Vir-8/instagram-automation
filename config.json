@@ -1,5 +1,5 @@
 {
-	"google_drive_folder_id": "1jvWVxvOZzENurPJIZNmYw41R",
+	"google_drive_folder_id": "1jvWVxvOZzENurPJIZNmYw41R-fa37LBh",
 	"list_of_accounts": [
 		"virat.kohli",
 		"mdshami.11",
@@ -7,6 +7,7 @@
 		"shreyasiyer96",
 		"jaspritb1"
 	],
+	"service_account_credentials_file": "./credentials.json",
 	"like": true,
 	"comment": false,
 	"number_of_posts": 5
