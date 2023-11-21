@@ -48,6 +48,19 @@ def handle_permissions(d):
 
 
 def find_accounts_on_device(connected_device, device):
+    connected_device.app_start(
+        "com.instagram.android", activity=".activity.MainTabActivity"
+    )
+
+    # Click on Cancel button if it exists
+    if connected_device(className="android.widget.Button", text="Cancel").exists():
+        connected_device(className="android.widget.Button", text="Cancel").click()
+        time.sleep(2)
+
+    # Click on Don't allow button if it exists
+    if connected_device(className="android.widget.Button", text="Don't allow").exists():
+        connected_device(className="android.widget.Button", text="Don't allow").click()
+
     account_handler = AccountHandler(connected_device)
     accounts = account_handler.get_all_accounts()
     return device, accounts
@@ -117,6 +130,8 @@ def main():
 
     # Task 3: Verify whether a Google Drive folder exists for each account
     verify_google_drive_folders(account_config)
+
+    print("Successfully generated account_config.json")
 
 
 main()
