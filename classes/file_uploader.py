@@ -5,6 +5,12 @@ VIDEO_PATH_ON_DEVICE = "storage/emulated/0/Movies/"
 
 resource_ids = {
     "just_once_button": "android:id/button_once",
+    "feed_right_arrow": "com.instagram.android:id/save",
+    "feed_next": "com.instagram.android:id/next_button_textview",
+    "feed_remix_popup_ok": "com.instagram.android:id/bb_primary_action",
+    "feed_share": "com.instagram.android:id/next_button_textview",
+    "close_friends_not_now": "com.instagram.android:id/auxiliary_button",
+    "video_story_popup_ok": "com.instagram.android:id/primary_button",
     "video_reel_popup_ok": "com.instagram.android:id/primary_action",
     "reel_upload_next": "com.instagram.android:id/clips_right_action_button",
     "reel_upload_share": "com.instagram.android:id/share_button",
@@ -38,7 +44,23 @@ class FileUploader:
         if d(resourceId=resource_ids["just_once_button"]).exists():
             d(resourceId=resource_ids["just_once_button"]).click()
 
-        print("uploaded")
+        # Popup that says "introducing longer stories..."
+        if d(text="OK", resourceId=resource_ids["video_story_popup_ok"]).exists():
+            d(text="OK", resourceId=resource_ids["video_story_popup_ok"]).click()
+            time.sleep(2)
+
+        if d(resourceId=resource_ids["close_friends_not_now"], text="Not now").exists():
+            d(resourceId=resource_ids["close_friends_not_now"], text="Not now").click()
+
+        d(description="Share to your story").click()
+        time.sleep(5)
+
+        # Another story popup after upload
+        if d(text="OK", resourceId=resource_ids["video_story_popup_ok"]).exists():
+            d(text="OK", resourceId=resource_ids["video_story_popup_ok"]).click()
+            time.sleep(2)
+
+        print("Uploaded story!")
 
     def upload_reel(self, d, path):
         d.shell(
@@ -88,4 +110,16 @@ class FileUploader:
 
         if d(resourceId=resource_ids["just_once_button"]).exists():
             d(resourceId=resource_ids["just_once_button"]).click()
-        print("uploaded")
+
+        # First right arrow
+        d(resourceId=resource_ids["feed_right_arrow"], description="Next").click()
+        time.sleep(2)
+
+        d(resourceId=resource_ids["feed_next"], description="Next").click()
+        time.sleep(8)
+
+        if d(resourceId=resource_ids["feed_remix_popup_ok"], text="OK").exists():
+            d(resourceId=resource_ids["feed_remix_popup_ok"], text="OK").click()
+
+        d(resourceId=resource_ids["feed_share"], text="Share").click()
+        print("Posted!")
