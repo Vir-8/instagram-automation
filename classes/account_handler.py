@@ -56,3 +56,6 @@ class AccountHandler:
         # Get number of accounts
         d(resourceId=resource_ids["account_element"], text=account).click()
         time.sleep(3)
+
+        d.press("back")
+        time.sleep(4)
