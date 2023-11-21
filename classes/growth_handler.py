@@ -148,14 +148,18 @@ class GrowthHandler:
                             post_found = True
                             time.sleep(2)
 
-                            self.like_post()
+                            if config_data["like"]:
+                                self.like_post()
                             # Probability of execution (20%)
-                            comment_probability = 0.2
+                            if config_data["comment"]:
+                                comment_probability = (
+                                    config_data["comment_probability"]
+                                ) / 100
 
-                            # Check if the function should be executed based on the probability
-                            if random.random() < comment_probability:
-                                self.comment_on_post()
-                            break
+                                # Check if the function should be executed based on the probability
+                                if random.random() < comment_probability:
+                                    self.comment_on_post()
+                                break
 
                     # If the element is not found, scroll and retry
                     if not post_found:
