@@ -8,7 +8,9 @@
 		"jaspritb1"
 	],
 	"service_account_credentials_file": "./credentials.json",
+	"follow": true,
 	"like": true,
 	"comment": false,
+	"comment_probability": 20,
 	"number_of_posts": 5
 }
