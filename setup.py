@@ -2,11 +2,12 @@ import os
 import json
 import uiautomator2 as u2
 import adbutils
-from gdrive_handler import GDriveHandler
-from file_uploader import FileUploader
-from growth_handler import GrowthHandler
-from account_handler import AccountHandler
+from classes.gdrive_handler import GDriveHandler
+from classes.file_uploader import FileUploader
+from classes.growth_handler import GrowthHandler
+from classes.account_handler import AccountHandler
 import concurrent.futures
+import time
 
 
 def handle_permissions(d):
@@ -22,6 +23,8 @@ def handle_permissions(d):
         "READ_MEDIA_AUDIO",
         "READ_PHONE_STATE",
         "CAMERA",
+        "VIBRATE",
+        "WAKE_LOCK",
         "RECORD_AUDIO",
         "ACCESS_FINE_LOCATION",
         "ACCESS_COARSE_LOCATION",
@@ -36,7 +39,12 @@ def handle_permissions(d):
             f"pm grant com.instagram.android android.permission.{permission};"
         )
 
-    d.shell(shell_command)
+    try:
+        print("Granting permissions...")
+        d.shell(shell_command)
+        time.sleep(15)
+    except Exception as e:
+        print(f"Error granting permissions: {e}")
 
 
 def find_accounts_on_device(connected_device, device):
