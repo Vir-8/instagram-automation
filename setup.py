@@ -23,8 +23,6 @@ def handle_permissions(d):
         "READ_MEDIA_AUDIO",
         "READ_PHONE_STATE",
         "CAMERA",
-        "VIBRATE",
-        "WAKE_LOCK",
         "RECORD_AUDIO",
         "ACCESS_FINE_LOCATION",
         "ACCESS_COARSE_LOCATION",
