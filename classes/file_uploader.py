@@ -34,10 +34,18 @@ class FileUploader:
         time.sleep(3)
         return local_video_path
 
-    def upload_story(self, d, path):
-        d.shell(
-            f"am start -a android.intent.action.SEND -t video/* --eu android.intent.extra.STREAM {path} com.instagram.android"
-        )
+    def upload_story(self, d, path, type):
+        if type == "image":
+            print("yes")
+            d.shell(
+                f"am start -a android.intent.action.SEND -t image/* --eu android.intent.extra.STREAM '{path}' com.instagram.android"
+            )
+        elif type == "video":
+            d.shell(
+                f"am start -a android.intent.action.SEND -t video/* --eu android.intent.extra.STREAM '{path}' com.instagram.android"
+            )
+        time.sleep(2)
+
         d(text="Stories").click()
         time.sleep(2)
 
@@ -52,9 +60,10 @@ class FileUploader:
         if d(resourceId=resource_ids["close_friends_not_now"], text="Not now").exists():
             d(resourceId=resource_ids["close_friends_not_now"], text="Not now").click()
 
+        time.sleep(8)
         d(description="Share to your story").click()
-        time.sleep(5)
 
+        time.sleep(5)
         # Another story popup after upload
         if d(text="OK", resourceId=resource_ids["video_story_popup_ok"]).exists():
             d(text="OK", resourceId=resource_ids["video_story_popup_ok"]).click()
@@ -64,7 +73,7 @@ class FileUploader:
 
     def upload_reel(self, d, path):
         d.shell(
-            f"am start -a android.intent.action.SEND -t video/* --eu android.intent.extra.STREAM {path} com.instagram.android"
+            f"am start -a android.intent.action.SEND -t video/* --eu android.intent.extra.STREAM '{path}' com.instagram.android"
         )
         if d(text="Reels").exists():
             d(text="Reels").click()

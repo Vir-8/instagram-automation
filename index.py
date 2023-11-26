@@ -115,15 +115,20 @@ def content_upload_handler(device):
                 print(
                     f"Downloading {media['name']} for account: {account} on device: {device}."
                 )
-                pc_vid_path = gdrive_handler.download_files(media)
+                pc_media_path = gdrive_handler.download_files(media)
 
-                file_handler = FileUploader(pc_vid_path)
-                android_vid_path = file_handler.transfer_file_to_device(d)
+                file_handler = FileUploader(pc_media_path)
+                android_media_path = file_handler.transfer_file_to_device(d)
                 try:
-                    if media["media_type"] == "video":
-                        file_handler.upload_reel(d, android_vid_path)
+                    if media["name"].startswith("STORY_"):
+                        print("Uploading story")
+                        file_handler.upload_story(
+                            d, android_media_path, media["media_type"]
+                        )
+                    elif media["media_type"] == "video":
+                        file_handler.upload_reel(d, android_media_path)
                     elif media["media_type"] == "image":
-                        file_handler.upload_post(d, android_vid_path)
+                        file_handler.upload_post(d, android_media_path)
                 except Exception as e:
                     print(f"Error: {e}")
                 print(f"{media['name']}' uploaded for account '{account}'.")
@@ -132,8 +137,8 @@ def content_upload_handler(device):
                 content[account] = media_list[1:]
                 time.sleep(15)
 
-                random_activity(d, 120)
-                time.sleep(1500)
+                random_activity(d, 5400)
+                time.sleep(120)
         d.app_stop("com.instagram.android")
 
     print(f"Finished uploading content from device: {device}")
