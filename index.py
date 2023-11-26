@@ -10,7 +10,10 @@ from classes.account_handler import AccountHandler
 import concurrent.futures
 import json
 
-resource_ids = {"home_button": "com.instagram.android:id/feed_tab"}
+resource_ids = {
+    "home_button": "com.instagram.android:id/feed_tab",
+    "explore_button": "com.instagram.android:id/search_tab",
+}
 
 # Load configuration from config.json
 with open("account_config.json", "r") as config_file:
@@ -25,33 +28,64 @@ def random_activity(d: Device, total_duration):
     print(f"Performing random activity on device: {d.serial}")
 
     activity_handler = GrowthHandler(d)
+    time.sleep(4)
+
     # Click on home in case home isn't open
-    d(resourceId=resource_ids["home_button"]).click()
+    d(resourceId=resource_ids["explore_button"]).click()
     time.sleep(2)
+
+    # Click on a post on the explore page
 
     scroll_chances = 0.3  # 70%
     like_chances = 0.3  # 30%
     comment_chances = 0.1  # 10%
 
-    # Start time of the loop
+    random_combinations = []
+    num_of_posts = 7
+
+    for row in range(1, 4):
+        for col in range(1, 4):
+            if not (row in [1, 2] and col == 3):
+                random_combinations.append(
+                    (f"row {row}, column {col}", f"column {col}, row {row}")
+                )
+
+    # Fetch all elements with the description attribute using XPath
+    elements_with_description = d.xpath("//*[@content-desc]").all()
     start_time = time.time()
 
-    # Main loop
+    time_per_post = total_duration / num_of_posts
+
     while time.time() - start_time < total_duration:
-        # Generate random time interval and number
-        interval = random.uniform(1, 5)
-        random_number = random.random()
+        for desc1, desc2 in random_combinations:
+            # Find the post and click
+            for element in elements_with_description:
+                if (
+                    desc1.lower() in element.info["contentDescription"].lower()
+                    or desc2.lower() in element.info["contentDescription"].lower()
+                ):
+                    element.click()
 
-        if random_number > scroll_chances:
-            # Swipe the screen from bottom to top
-            activity_handler.scroll(0.3)
-        elif random_number < like_chances:
-            activity_handler.like_post()
-            if random_number < comment_chances:
-                activity_handler.comment_on_post()
-                activity_handler.scroll(0.3)
+                    # Perform random activity on selected post
+                    clicked_time = time.time()
+                    while time.time() - clicked_time < time_per_post:
+                        # Generate random time interval and number
+                        interval = random.uniform(1, 5)
+                        random_number = random.random()
 
-        time.sleep(interval)
+                        if random_number > scroll_chances:
+                            # Swipe the screen from bottom to top
+                            activity_handler.scroll(0.3)
+                        elif random_number < like_chances:
+                            activity_handler.like_post()
+                            if random_number < comment_chances:
+                                activity_handler.comment_on_post()
+                                activity_handler.scroll(0.3)
+
+                        time.sleep(interval)
+
+                    d.press("back")
+                    time.sleep(4)
 
     time.sleep(2)
     d.app_stop("com.instagram.android")
@@ -121,7 +155,6 @@ def content_upload_handler(device):
                 android_media_path = file_handler.transfer_file_to_device(d)
                 try:
                     if media["name"].startswith("STORY_"):
-                        print("Uploading story")
                         file_handler.upload_story(
                             d, android_media_path, media["media_type"]
                         )
