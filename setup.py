@@ -83,6 +83,7 @@ def verify_google_drive_folders(account_config):
     account_folders = drive_handler.get_all_folders()
 
     unavailable_folders = 0
+    unused_folders = 0
 
     for device, device_accounts in account_config["devices"].items():
         for account, folder_id in device_accounts.items():
@@ -100,7 +101,22 @@ def verify_google_drive_folders(account_config):
                     f"Warning: Folder for account '{account}' on device '{device}' is not available."
                 )
 
-    num_available_folders = len(account_folders) - unavailable_folders
+    for folder in account_folders:
+        exists = False
+        for device, device_accounts in account_config["devices"].items():
+            for account, folder_id in device_accounts.items():
+                if folder["name"] == account:
+                    exists = True
+                    break
+
+            if exists:
+                break
+
+        unused_folders += 1 if not exists else 0
+
+    num_available_folders = len(account_folders) - (
+        unavailable_folders + unused_folders
+    )
     if len(account_folders) > num_available_folders:
         print(
             f"Warning: {len(account_folders) - num_available_folders} unused folder(s) found in Google drive."
