@@ -85,10 +85,21 @@ class GrowthHandler:
         random_comment = random.choice(comments)
 
         comment_button = d(resourceId=resource_ids["comment_button"])
+        reel_comment_button = d(description="Comment")
         comment_text_area = d(resourceId=resource_ids["comment_input"])
         post_comment_button = d(resourceId=resource_ids["post_comment"])
 
-        comment_button.click()
+        if reel_comment_button.exists():
+            reel_comment_button.click()
+        elif comment_button.exists():
+            comment_button.click()
+        else:
+            self.scroll(0.08)
+            comment_button.click() if comment_button.exists() else print(
+                "Error commenting on post."
+            )
+            return
+
         comment_text_area.set_text(f"{random_comment}")
         post_comment_button.click()
 
