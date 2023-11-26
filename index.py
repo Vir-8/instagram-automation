@@ -9,6 +9,7 @@ from classes.growth_handler import GrowthHandler
 from classes.account_handler import AccountHandler
 import concurrent.futures
 import json
+import os
 
 resource_ids = {
     "home_button": "com.instagram.android:id/feed_tab",
@@ -21,6 +22,8 @@ with open("account_config.json", "r") as config_file:
 
 with open("config.json", "r") as file:
     config_data = json.load(file)
+
+RANDOM_ACTIVITY_TIME = config_data["random_activity_time_in_mins"]
 
 
 def random_activity(d: Device, total_duration):
@@ -110,17 +113,17 @@ def account_growth_handler(device):
             growth_handler.promote_accounts()
 
         time.sleep(8)
-        random_activity(d, 120)
+        random_activity(d, 60 * RANDOM_ACTIVITY_TIME)
 
         d.app_stop("com.instagram.android")
-        time.sleep(1500)
+        time.sleep(120)
     print("Finished promoting accounts")
 
 
 def content_upload_handler(device):
     d = u2.connect(device)
     d.dump_hierarchy()  # As ADB can cause issues otherwise
-    pc_folder_path = "./content"
+    pc_folder_path = os.path.join(".", "content")
 
     gdrive_handler = GDriveHandler(pc_folder_path)
     account_handler = AccountHandler(d)
@@ -170,7 +173,7 @@ def content_upload_handler(device):
                 content[account] = media_list[1:]
                 time.sleep(15)
 
-                random_activity(d, 5400)
+                random_activity(d, 60 * RANDOM_ACTIVITY_TIME)
                 time.sleep(120)
         d.app_stop("com.instagram.android")
 
