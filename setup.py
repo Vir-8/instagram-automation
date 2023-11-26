@@ -114,13 +114,9 @@ def verify_google_drive_folders(account_config):
 
         unused_folders += 1 if not exists else 0
 
-    num_available_folders = len(account_folders) - (
-        unavailable_folders + unused_folders
-    )
+    num_available_folders = len(account_folders) - unused_folders
     if len(account_folders) > num_available_folders:
-        print(
-            f"Warning: {len(account_folders) - num_available_folders} unused folder(s) found in Google drive."
-        )
+        print(f"Warning: {unused_folders} unused folder(s) found in Google drive.")
 
     # Save the results in account_config.json
     with open("account_config.json", "w") as json_file:
