@@ -23,6 +23,7 @@ resource_ids = {
     "search_bar": "com.instagram.android:id/action_bar_search_edit_text",
     "search_account": "com.instagram.android:id/row_search_user_username",
     "like_button": "com.instagram.android:id/row_feed_button_like",
+    "reel_like_button": "com.instagram.android:id/like_button",
     "comment_button": "com.instagram.android:id/row_feed_button_comment",
     "comment_input": "com.instagram.android:id/layout_comment_thread_edittext",
     "post_comment": "com.instagram.android:id/layout_comment_thread_post_button_click_area",
@@ -68,8 +69,11 @@ class GrowthHandler:
     def like_post(self):
         d = self.d
         like_button = d(resourceId=resource_ids["like_button"])
+        reel_like_button = d(resourceId=resource_ids["reel_like_button"])
 
-        if like_button.exists():
+        if reel_like_button.exists():
+            reel_like_button.click()
+        elif like_button.exists():
             like_button.click()
         else:
             self.scroll(0.08)
