@@ -36,7 +36,6 @@ class FileUploader:
 
     def upload_story(self, d, path, type):
         if type == "image":
-            print("yes")
             d.shell(
                 f"am start -a android.intent.action.SEND -t image/* --eu android.intent.extra.STREAM '{path}' com.instagram.android"
             )
@@ -44,11 +43,10 @@ class FileUploader:
             d.shell(
                 f"am start -a android.intent.action.SEND -t video/* --eu android.intent.extra.STREAM '{path}' com.instagram.android"
             )
-        time.sleep(2)
-
+        time.sleep(4)
         d(text="Stories").click()
-        time.sleep(2)
 
+        time.sleep(4)
         if d(resourceId=resource_ids["just_once_button"]).exists():
             d(resourceId=resource_ids["just_once_button"]).click()
 
@@ -75,15 +73,18 @@ class FileUploader:
         d.shell(
             f"am start -a android.intent.action.SEND -t video/* --eu android.intent.extra.STREAM '{path}' com.instagram.android"
         )
+
+        time.sleep(4)
         if d(text="Reels").exists():
             d(text="Reels").click()
         elif d(description="Reels").exists():
             d(description="Reels").click()
 
+        time.sleep(4)
         if d(resourceId=resource_ids["just_once_button"]).exists():
             d(resourceId=resource_ids["just_once_button"]).click()
-        time.sleep(12)
 
+        time.sleep(12)
         # Popup that says "videos will be uploaded as reels instead of posts"
         if d(text="OK", resourceId=resource_ids["video_reel_popup_ok"]).exists():
             d(text="OK", resourceId=resource_ids["video_reel_popup_ok"]).click()
@@ -114,9 +115,10 @@ class FileUploader:
         d.shell(
             f"am start -a android.intent.action.SEND -t image/* --eu android.intent.extra.STREAM '{path}' com.instagram.android"
         )
+        time.sleep(4)
         d(text="Feed").click()
-        time.sleep(2)
 
+        time.sleep(4)
         if d(resourceId=resource_ids["just_once_button"]).exists():
             d(resourceId=resource_ids["just_once_button"]).click()
 
