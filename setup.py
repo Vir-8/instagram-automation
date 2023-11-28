@@ -49,6 +49,7 @@ def find_accounts_on_device(connected_device, device):
     connected_device.app_start(
         "com.instagram.android", activity=".activity.MainTabActivity"
     )
+    time.sleep(4)
 
     # Click on Cancel button if it exists
     if connected_device(className="android.widget.Button", text="Cancel").exists():
