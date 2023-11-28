@@ -1,6 +1,7 @@
 import os
 import time
 import json
+import random
 
 VIDEO_PATH_ON_DEVICE = "storage/emulated/0/Movies/"
 
@@ -110,14 +111,14 @@ class FileUploader:
         ).click()
         time.sleep(6)
 
-        # Add caption if available
-        if name in captions:
-            caption = captions[name]
-            caption_text_area = d(resourceId=resource_ids["reel_caption_input"])
-            caption_text_area.set_text(f"{caption}")
-            time.sleep(2)
-            d.press("back")
-            time.sleep(2)
+        # Add caption
+        caption = random.choice(captions)
+        caption_text_area = d(resourceId=resource_ids["reel_caption_input"])
+        caption_text_area.set_text(f"{caption}")
+        time.sleep(2)
+
+        d.press("back")
+        time.sleep(2)
 
         # upload the reel
         if d(resourceId=resource_ids["reel_upload_share"]).exists():
@@ -156,14 +157,14 @@ class FileUploader:
             d(resourceId=resource_ids["feed_remix_popup_ok"], text="OK").click()
             time.sleep(3)
 
-        # Add caption if available
-        if name in captions:
-            caption = captions[name]
-            caption_text_area = d(resourceId=resource_ids["post_caption_input"])
-            caption_text_area.set_text(f"{caption}")
-            time.sleep(2)
-            d.press("back")
-            time.sleep(2)
+        # Add caption
+        caption = random.choice(captions)
+        caption_text_area = d(resourceId=resource_ids["post_caption_input"])
+        caption_text_area.set_text(f"{caption}")
+        time.sleep(2)
+
+        d.press("back")
+        time.sleep(2)
 
         d(resourceId=resource_ids["feed_share"], text="Share").click()
         print("Posted!")

@@ -14,8 +14,9 @@
 	"comment": false,
 	"comment_probability": 20,
 	"number_of_posts": 5,
-	"captions": {
-		"post1.jpg": "An amazing caption!",
-		"reel.mp4": "Another fantaaaastic caption!!"
-	}
+	"captions": [
+		"An amazing caption!",
+		"Another fantaaaastic caption!!",
+		"Marvelous, stunning caption!!"
+	]
 }
