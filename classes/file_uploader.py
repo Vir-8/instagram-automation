@@ -1,7 +1,16 @@
 import os
 import time
+import json
 
 VIDEO_PATH_ON_DEVICE = "storage/emulated/0/Movies/"
+
+# Load configuration from config.json
+captions_path = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), "..", "captions.json"
+)
+
+with open(captions_path, "r") as captions_file:
+    captions = json.load(captions_file)
 
 resource_ids = {
     "just_once_button": "android:id/button_once",
@@ -16,6 +25,8 @@ resource_ids = {
     "reel_upload_share": "com.instagram.android:id/share_button",
     "reel_privacy_popup_share_1": "com.instagram.android:id/clips_download_privacy_nux_button",
     "reel_privacy_popup_share_2": "com.instagram.android:id/clips_nux_sheet_share_button",
+    "post_caption_input": "com.instagram.android:id/caption_text_view",
+    "reel_caption_input": "com.instagram.android:id/caption_input_text_view",
 }
 
 
@@ -69,22 +80,22 @@ class FileUploader:
 
         print("Uploaded story!")
 
-    def upload_reel(self, d, path):
+    def upload_reel(self, d, path, name):
         d.shell(
             f"am start -a android.intent.action.SEND -t video/* --eu android.intent.extra.STREAM '{path}' com.instagram.android"
         )
-
         time.sleep(4)
+
         if d(text="Reels").exists():
             d(text="Reels").click()
         elif d(description="Reels").exists():
             d(description="Reels").click()
-
         time.sleep(4)
+
         if d(resourceId=resource_ids["just_once_button"]).exists():
             d(resourceId=resource_ids["just_once_button"]).click()
-
         time.sleep(12)
+
         # Popup that says "videos will be uploaded as reels instead of posts"
         if d(text="OK", resourceId=resource_ids["video_reel_popup_ok"]).exists():
             d(text="OK", resourceId=resource_ids["video_reel_popup_ok"]).click()
@@ -96,6 +107,15 @@ class FileUploader:
             resourceId=resource_ids["reel_upload_next"],
         ).click()
         time.sleep(6)
+
+        # Add caption if available
+        if name in captions:
+            caption = captions[name]
+            caption_text_area = d(resourceId=resource_ids["reel_caption_input"])
+            caption_text_area.set_text(f"{caption}")
+            time.sleep(2)
+            d.press("back")
+            time.sleep(2)
 
         # upload the reel
         if d(resourceId=resource_ids["reel_upload_share"]).exists():
@@ -111,7 +131,7 @@ class FileUploader:
 
         print("Uploaded reel.")
 
-    def upload_post(self, d, path):
+    def upload_post(self, d, path, name):
         d.shell(
             f"am start -a android.intent.action.SEND -t image/* --eu android.intent.extra.STREAM '{path}' com.instagram.android"
         )
@@ -119,6 +139,7 @@ class FileUploader:
         d(text="Feed").click()
 
         time.sleep(4)
+
         if d(resourceId=resource_ids["just_once_button"]).exists():
             d(resourceId=resource_ids["just_once_button"]).click()
 
@@ -131,6 +152,16 @@ class FileUploader:
 
         if d(resourceId=resource_ids["feed_remix_popup_ok"], text="OK").exists():
             d(resourceId=resource_ids["feed_remix_popup_ok"], text="OK").click()
+            time.sleep(3)
+
+        # Add caption if available
+        if name in captions:
+            caption = captions[name]
+            caption_text_area = d(resourceId=resource_ids["post_caption_input"])
+            caption_text_area.set_text(f"{caption}")
+            time.sleep(2)
+            d.press("back")
+            time.sleep(2)
 
         d(resourceId=resource_ids["feed_share"], text="Share").click()
         print("Posted!")
