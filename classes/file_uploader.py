@@ -5,12 +5,14 @@ import json
 VIDEO_PATH_ON_DEVICE = "storage/emulated/0/Movies/"
 
 # Load configuration from config.json
-captions_path = os.path.join(
-    os.path.dirname(os.path.abspath(__file__)), "..", "captions.json"
+config_path = os.path.join(
+    os.path.dirname(os.path.abspath(__file__)), "..", "config.json"
 )
 
-with open(captions_path, "r") as captions_file:
-    captions = json.load(captions_file)
+with open(config_path, "r") as config_file:
+    config = json.load(config_file)
+
+captions = config["captions"]
 
 resource_ids = {
     "just_once_button": "android:id/button_once",

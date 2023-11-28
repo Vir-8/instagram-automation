@@ -1,6 +1,6 @@
 {
 	"google_drive_folder_id": "1jvWVxvOZzENurPJIZNmYw41R-fa37LBh",
-	"random_activity_time_in_mins": 20,
+	"random_activity_time_in_mins": 7,
 	"list_of_accounts": [
 		"virat.kohli",
 		"mdshami.11",
@@ -13,5 +13,9 @@
 	"like": true,
 	"comment": false,
 	"comment_probability": 20,
-	"number_of_posts": 5
+	"number_of_posts": 5,
+	"captions": {
+		"post1.jpg": "An amazing caption!",
+		"reel.mp4": "Another fantaaaastic caption!!"
+	}
 }

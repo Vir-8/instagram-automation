@@ -58,7 +58,7 @@ This script automates Instagram activities such as content uploading and account
 
    - Configure the script using `config.json`.
    - Adjust settings such as random activity time, follow/like/comment preferences, etc.
-   - Ensure that your post/reel captions are correctly configured in `captions.json`, along with the file extension in the name as shown.
+   - Ensure that your post/reel captions are correctly configured in `config.json`, along with the file extension in the name as shown.
 
 2. **Run the Script:**
 
